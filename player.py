@@ -45,13 +45,13 @@ class adv:
         self.info = {}  # the last status json from post or get
         # whether player picks up items or not - it is very easy to get overencumbered
         self.accumulate = False
-        self.pray = True  # can't pray without a name unfortunately
+        self.pray = False  # can't pray without a name unfortunately
         self.save_map_to_text = save  # save latest map to a text file
         # import map so far - setting to false starts from scratch
         self.import_text_map = load_map
         self.player = None
         self.fly = False
-        self.dash = True
+        self.dash = False
         self.important_rooms = {} # May not need this anymore (all special rooms are id'd)
         self.hour = datetime.datetime.today().hour
         self.auto_stop = 19
@@ -127,7 +127,7 @@ class adv:
             print('error', what, treasure, response.status_code)
 
     def room_check(self):
-        """checks for items in teh room or special rooms"""
+        """checks for items in the room or special rooms"""
         # print('room check triggered.  info: ',self.info)
         if self.info['items'] != [] and self.accumulate:
             for item in self.info['items']:
@@ -357,13 +357,18 @@ class adv:
         time.sleep(self.wait)
 
     def wishing_well(self):
-        # Goes directly to pirate ry
+        # wishing well
         self.go_to_room(55)
         time.sleep(self.wait)
 
     def vendor(self):
         # Goes directly to the shop
         self.go_to_room(1)
+        time.sleep(self.wait)
+
+    def shrine(self):
+        # goes directly to wishing well
+        self.go_to_room(461)
         time.sleep(self.wait)
 
     # Method to get treasure
@@ -381,14 +386,14 @@ class adv:
             token = auth_key
             headers = {'Authorization': f'Token {token}'}
             r = requests.post(url, headers=headers)
-            ret_data = r.json()
+            player = r.json()
             print('\n')
             print(f"***********Current Character Attributes***************")
-            print(ret_data)
+            print(player)
             print("*******************************************************")
 
             #!------------------------This name is specific to each person, be sure to change this to yours.
-            if ret_data['name'] == current_name and ret_data['gold'] >= 1000:
+            if player['name'] == current_name and player['gold'] >= 1000:
                 # Go to name changer (pirate ry)
                 print('Time to Buy a Name')
                 # * Made this false here so that we don't somehow pick up a ton of treasure on the way, and
@@ -400,13 +405,10 @@ class adv:
                 #! -------------------------- Change the name here to be what you want!!
                 self.action('change_name', name=my_name)
                 time.sleep(self.wait)
-
-                #! This print isn't accurate. It doesn't update when you actually change your name.
-                #! Next time you see it, it should have changed though.
-                print(f"Got a name! Time to get a COIN. New Name: {ret_data['name']}")
+                self.pray = True
+                print(f"Got a name! Time to get a COIN.")
                 time.sleep(self.wait)
-                # self.action('status') #Check new name
-            elif ret_data['encumbrance'] <= ret_data['strength'] - 2:
+            elif player['encumbrance'] <= player['strength'] - 2:
                 # If encumbered is str-2 (at base = 8)
                 # Travel the room bfs style at random
                 # Loot as you go with room_check
@@ -416,9 +418,17 @@ class adv:
 
                 # self.explore_random(500)
                 self.go_to_room(random.randint(0, 499))
-                print('Current Inventory: ', ret_data['inventory'])
+                print('Current Inventory: ', player['inventory'])
                 time.sleep(self.wait)
-            # Could potentially add a section to manage miner
+            elif 'pray' in player['abilities'] && 'dash' not in player['abilities']:
+                print('Time to get a new ability')
+                self.pray = True
+                self.accumulate = False
+                self.shrine()
+            elif player['has_mined'] == False && 'mine' in player['abilities'] && 'dash' in player['abilities']:
+                print('Ya gon mine')
+                self.accumulate = False
+                self.auto_coins(acc=True, fly=False)
             else:
                 # else go directly to the shop
                 # loop through inventory and sell
@@ -428,14 +438,14 @@ class adv:
                 self.accumulate = False
                 self.vendor()
                 print('At the shop, time to sell.')
-                for item in ret_data['inventory']:
+                for item in player['inventory']:
                     print(f"Selling {item}...")
                     self.action('sell', item)
                     time.sleep(self.wait)
                     self.action('confirm_sell', item)
                     time.sleep(self.wait)
                     # This doesn't actually update after each sell for some reason.
-                    print(f"You're current gold: {ret_data['gold']}")
+                    print(f"Your current gold: {player['gold']}")
                 print('Back to Looting')
 
     def get_coins(self):
