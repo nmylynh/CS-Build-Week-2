@@ -59,14 +59,14 @@ class adv:
         self.crappy_items = []
         self.want_to_mine = want_to_mine
 
-    def get_info(self, what='init', direction=None, backtrack=None):
+    def get_info(self, command='init', direction=None, backtrack=None):
         """multi purpose move & init function - this is used
         for the most common actions"""
 
-        if what == 'init':
-            response = requests.get(f'{my_url}{what}/', headers=self.header)
+        if command == 'init':
+            response = requests.get(f'{my_url}{command}/', headers=self.header)
 
-        elif what == 'move':
+        elif command == 'move':
             if self.fly and self.info['elevation']>0:
                 response = requests.post(
                             f'{my_url}fly/', headers=self.header, json={"direction": direction})
@@ -74,11 +74,11 @@ class adv:
                 response = requests.post(
                     f'{my_url}move/', headers=self.header, json={"direction": direction})
 
-        elif what == 'fly':
+        elif command == 'fly':
             response = requests.post(
                 f'{my_url}fly/', headers=self.header, json={"direction": direction})
 
-        elif what == 'backtrack':
+        elif command == 'backtrack':
             response = requests.post(f'{my_url}move/', headers=self.header,
                                      json={"direction": direction, "next_room_id": backtrack})
 
@@ -95,30 +95,30 @@ class adv:
         else:
             print('cooldown triggered - waiting 20 seconds')
             time.sleep(20)
-            self.get_info(what=what, direction=direction, backtrack=backtrack)
+            self.get_info(command=command, direction=direction, backtrack=backtrack)
 
-    def action(self, what='take', treasure=None, name=None):
+    def action(self, command='take', treasure=None, name=None):
         """another multi purpose request function
         this one focuses on less common actions"""
 
-        if what in ['take', 'drop', 'sell', 'examine', 'wear', 'transmogrify']:
+        if command in ['take', 'drop', 'sell', 'examine', 'wear', 'transmogrify']:
             response = requests.post(
-                f'{my_url}{what}/', headers=self.header, json={"name": treasure})
-            print(f"Action: {what}")
+                f'{my_url}{command}/', headers=self.header, json={"name": treasure})
+            print(f"Action: {command}")
 
-        if what in ['status', 'pray']:
-            response = requests.post(f'{my_url}{what}/', headers=self.header)
-            print(f"Action: {what}")
+        if command in ['status', 'pray']:
+            response = requests.post(f'{my_url}{command}/', headers=self.header)
+            print(f"Action: {command}")
 
-        if what == 'confirm_sell':
+        if command == 'confirm_sell':
             response = requests.post(
-                f'{my_url}{what}/', headers=self.header, json={"name": treasure, "confirm": "yes"})
+                f'{my_url}{command}/', headers=self.header, json={"name": treasure, "confirm": "yes"})
 
-        if what == 'change_name':
+        if command == 'change_name':
             response = requests.post(
-                f'{my_url}{what}/', headers=self.header, json={"name": name, "confirm": "aye"})
+                f'{my_url}{command}/', headers=self.header, json={"name": name, "confirm": "aye"})
         
-        if what == 'balance':
+        if command == 'balance':
             response = requests.get(
                 'https://lambda-treasure-hunt.herokuapp.com/api/bc/get_balance/', headers=self.header)
 
@@ -128,7 +128,7 @@ class adv:
                 time.sleep(self.info['cooldown'])
             return self.info
         else:
-            print('error', what, treasure, response.status_code)
+            print('error', command, treasure, response.status_code)
 
     def room_check(self):
         """checks for items in the room or special rooms"""
@@ -282,7 +282,7 @@ class adv:
             exits = self.my_map.vertices[room]
             for direction in exits:
                 if self.my_map.vertices[room][direction] == m:
-                    self.get_info(what='move', direction=direction)
+                    self.get_info(command='move', direction=direction)
                     print(
                         f"Current Room -> Title: {self.info['title']} ID: {self.info['room_id']} Items: {self.info['items']}")
                 else:
@@ -309,7 +309,7 @@ class adv:
                 for direction in exits:
                     if self.my_map.vertices[room][direction] == path[i+1]:
                         #print('walk triggered',path[i+1],direction)
-                        self.get_info(what='backtrack', direction=direction,backtrack=str(path[i+1]))
+                        self.get_info(command='backtrack', direction=direction,backtrack=str(path[i+1]))
                         print(
                             f"Current Room -> Title: {self.info['title']} ID: {self.info['room_id']} Items: {self.info['items']}")
                            
@@ -353,7 +353,7 @@ class adv:
         else:
             print('cooldown triggered - waiting 20 seconds. code =',response.status_code,response.content)
             time.sleep(20)
-            self.get_info(what=what, direction=direction, backtrack=backtrack)
+            self.get_info(command=command, direction=direction, backtrack=backtrack)
 
     def pirate(self):
         # Goes directly to pirate ry
