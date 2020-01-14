@@ -385,7 +385,6 @@ class adv:
             print(player)
             print("*******************************************************")
 
-            #!------------------------This name is specific to each person, be sure to change this to yours.
             if player['name'] != my_name and player['gold'] >= 1000:
                 # Go to name changer (pirate ry)
                 print('Time to Buy a Name')
