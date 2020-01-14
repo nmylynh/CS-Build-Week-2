@@ -8,6 +8,7 @@ URL=https://lambda-treasure-hunt.herokuapp.com/api/adv/
 NAME=[whatever name you want when you change it]
 ```
 3. run `python adventureTime.py` in the terminal
+4. leave it and forget it
 
 # CS Build Week 2
 
