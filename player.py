@@ -370,7 +370,7 @@ class adv:
         time.sleep(self.wait)
 
     def shrine(self):
-        # goes directly to wishing well
+        # goes directly to shrine
         self.go_to_room(461)
         time.sleep(self.wait)
 
