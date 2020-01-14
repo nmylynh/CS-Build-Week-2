@@ -1,5 +1,13 @@
-# INSTRUCTIONS: JUST RUN `adventureTime.py`, but remember to change the name, put in your key, and url for API
+# INSTRUCTIONS: 
 
+1. pipenv install
+2. create a .env file:
+```
+KEY=[your key/token]
+URL=https://lambda-treasure-hunt.herokuapp.com/api/adv/
+NAME=[whatever name you want when you change it]
+```
+3. run `python adventureTime.py` in the terminal
 
 # CS Build Week 2
 
