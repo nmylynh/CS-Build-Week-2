@@ -37,7 +37,7 @@ class Player:
 
 
 class adv:
-    def __init__(self, auth=auth_key, save=True, load_map=True):
+    def __init__(self, auth=auth_key, save=True, load_map=True, want_to_mine=True):
         self.auth = auth  # the auth token
         # the header for post and get
         self.header = {'Authorization': f'Token {self.auth}'}
@@ -57,6 +57,7 @@ class adv:
         self.auto_stop = 19
         self.balance = None
         self.crappy_items = []
+        self.want_to_mine = want_to_mine
 
     def get_info(self, what='init', direction=None, backtrack=None):
         """multi purpose move & init function - this is used
@@ -411,14 +412,17 @@ class adv:
                 self.pray = True
                 print(f"Got a name! Time to get a COIN.")
                 time.sleep(self.wait)
-            elif player['has_mined'] == True and 'mine' in player['abilities'] and 'dash' in player['abilities']:
+            elif player['has_mined'] == False and 'mine' in player['abilities'] and 'dash' in player['abilities']:
                 print('ya gon mine')
                 self.auto_coins(acc=True, fly=False)               
             elif 'pray' in player['abilities'] and 'dash' not in player['abilities']:
                 print('Time to get a new ability')
                 self.pray = True
                 self.accumulate = False
-                self.shrine()            
+                self.shrine()
+            elif self.want_to_mine == True and player['has_mined']:
+                print('ya gon mine')
+                self.auto_coins(acc=True, fly=False)                     
             elif player['encumbrance'] <= player['strength'] - 2:
                 # If encumbered is str-2 (at base = 8)
                 # Travel the room bfs style at random
