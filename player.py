@@ -24,17 +24,6 @@ class Player:
     def __init__(self, name, startingRoom):
         self.name = name
         self.currentRoom = startingRoom
-        self.player_cooldown = 1,
-        self.player_encumbrance = 0,
-        self.player_strength = 0,
-        self.player_speed = 0,
-        self.player_gold = 0,
-        self.player_inventory = [],
-        self.player_status = [],
-        self.player_errors = [],
-        self.player_messages = []
-        self.player_mine = ''
-
 
 class adv:
     def __init__(self, auth=auth_key, save=True, load_map=True, want_to_mine=True):
