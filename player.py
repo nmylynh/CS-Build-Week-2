@@ -571,7 +571,7 @@ class adv:
             self.hour = datetime.datetime.today().hour
             self.check_balance()
             self.check_for_crap()
-            if self.balance > 5 and 'inventory' in self.info.keys() and len(self.info['inventory']) >= 3 and self.crappy_items:
+            if self.balance >= 3 and 'inventory' in self.info.keys() and len(self.info['inventory']) >= 3 and self.crappy_items:
                 print(f'you have {self.balance} coins and useless stuff')
                 print('let us transmogrify them into something beautiful using your coins')
                 self.dash_to_room(495)
