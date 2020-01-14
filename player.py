@@ -55,6 +55,8 @@ class adv:
         self.important_rooms = {} # May not need this anymore (all special rooms are id'd)
         self.hour = datetime.datetime.today().hour
         self.auto_stop = 19
+        self.balance = None
+        self.crappy_items = []
 
     def get_info(self, what='init', direction=None, backtrack=None):
         """multi purpose move & init function - this is used
@@ -118,7 +120,7 @@ class adv:
         if what == 'balance':
             response = requests.get(
                 'https://lambda-treasure-hunt.herokuapp.com/api/bc/get_balance/', headers=self.header)
-        if what == tr
+
         if response.status_code == 200:
             self.info = json.loads(response.content)
             if 'cooldown' in self.info.keys():
@@ -527,59 +529,90 @@ class adv:
     def equip_items(self):
         self.action('status')
         inv = self.info['inventory']
-        for i in inv:
-            if 'treasure' not in i:
-                self.action('wear', i)
+        good_stuff = ['well', 'nice']
+        equip = self.Filter(inv, good_stuff)
+
+        if equip:        
+            for i in equip:
+                if 'jacket' in i and 'well' not in self.info['bodywear']:
+                    self.action('wear', i)
+                    print(f'you wore {i}')
+                elif 'boots' in i and 'well' not in self.info['footwear']:
+                    self.action('wear', i)
+                    print(f'you wore {i}')
+                else:
+                    print(f'Hmm. {i} is definitely not better than the one you are wearing.')
+        else:
+            for i in inv:
+                if 'treasure' not in i:
+                    self.action('wear', i)
 
     def transmogrify(self):
         self.action('status')
-        inv = self.info['inventory']
+        inv = self.crappy_items
         for i in inv:
             self.action('transmogrify', i)
-        
+            print(f'you transmogrified {i}')
+        self.crappy_items = None
+
+    def check_balance(self):
+        self.action('balance')
+        msg = re.findall(r'\d+', self.info['messages'][0])
+        if msg:
+            self.balance = list(map(int, msg))[0]
+
+    def check_for_crap(self):
+        self.action('status')
+        poopy_items = ['poor', 'terrible', 'treasure']
+        inv = self.info['inventory']
+        crap_check = self.Filter(inv, poopy_items)
+        if crap_check:
+            self.crappy_items = crap_check           
+
+    def Filter(self, string, substr):
+        return [str for str in string if any(sub in str for sub in substr)]
 
     def auto_coins(self,acc=True,fly=True):
-        "now added timer stop"
         self.fly = fly
         self.accumulate = acc
-        self.balance = 0
         while True:
             self.hour = datetime.datetime.today().hour
-            self.action('status')
-            if 'encumbrance' in self.info.keys() and self.info['encumbrance']>16:
+            self.check_balance()
+            self.check_for_crap()
+            if self.balance > 5 and 'inventory' in self.info.keys() and len(self.info['inventory']) >= 3 and self.crappy_items:
+                print(f'you have {self.balance} coins and useless stuff')
+                print('let us transmogrify them into something beautiful using your coins')
+                self.dash_to_room(495)
+                self.transmogrify()
+                self.equip_items()
+                self.action('status')
+                print(self.info)
+            elif 'encumbrance' in self.info.keys() and self.info['encumbrance']>16:
                 self.dash_to_room(1)
                 self.sell_all_items()
                 self.action('status')
                 print(self.info)
-            if self.balance > 5 and len(self.info['inventory']) >= 3:
-                print('you have {self.balance} coins...')
-                print('we go transmogrify yo coins')
-                self.dash_to_room(495)
-                self.transmogrify()
-                self.equip_items()
-
-            self.dash_to_room(55)
-            self.hint_to_ld8()
-            cpu = CPU()
-            cpu.load('hinter.ls8')
-            room_inst = cpu.run()
-            room_inst = ''.join(room_inst)
-            print(room_inst)
-            try:
-                mine_room = int(room_inst[-3:])
-            except:
+            else:
+                self.dash_to_room(55)
+                self.hint_to_ld8()
+                cpu = CPU()
+                cpu.load('hinter.ls8')
+                room_inst = cpu.run()
+                room_inst = ''.join(room_inst)
+                print(room_inst)
                 try:
-                    mine_room = int(room_inst[-2:])
+                    mine_room = int(room_inst[-3:])
                 except:
-                    mine_room = int(room_inst[-1:])
-            print(mine_room)
-            self.dash_to_room(mine_room)
-            self.get_proof()
-            self.action('balance')  #new lines
-            print(self.info)        #new 
-            msg = re.findall(r'\d+', self.info['messages'][0])
-                if msg:
-                    self.balance = list(map(int, msg))[0]
+                    try:
+                        mine_room = int(room_inst[-2:])
+                    except:
+                        mine_room = int(room_inst[-1:])
+                print(mine_room)
+                self.dash_to_room(mine_room)
+                self.get_proof()
+                self.action('balance')
+                print(self.info) 
+
 
     
 
