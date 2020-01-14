@@ -420,12 +420,12 @@ class adv:
                 self.go_to_room(random.randint(0, 499))
                 print('Current Inventory: ', player['inventory'])
                 time.sleep(self.wait)
-            elif 'pray' in player['abilities'] && 'dash' not in player['abilities']:
+            elif 'pray' in player['abilities'] and 'dash' not in player['abilities']:
                 print('Time to get a new ability')
                 self.pray = True
                 self.accumulate = False
                 self.shrine()
-            elif player['has_mined'] == False && 'mine' in player['abilities'] && 'dash' in player['abilities']:
+            elif player['has_mined'] == False and 'mine' in player['abilities'] and 'dash' in player['abilities']:
                 print('Ya gon mine')
                 self.accumulate = False
                 self.auto_coins(acc=True, fly=False)
