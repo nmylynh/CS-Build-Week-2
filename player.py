@@ -11,8 +11,7 @@ import datetime
 
 auth_key = '066daecf006de183e6b971b5eadd3c70cb5fee9d' # MAKE SURE YPU HAVE .ENV SET UP
 my_url ='https://lambda-treasure-hunt.herokuapp.com/api/adv/'  # AND PYTHON DECOUPLE INSTALLED
-my_name = 'Mylynh'  # when to change name
-current_name = 'User 20305' # your unchanged name
+my_name = 'Mitsy'  # when to change name
 
 
 def keystoint(x):
@@ -105,6 +104,7 @@ class adv:
 
         if what in ['status', 'pray']:
             response = requests.post(f'{my_url}{what}/', headers=self.header)
+            print(f"Action: {what}")
 
         if what == 'confirm_sell':
             response = requests.post(
@@ -137,9 +137,9 @@ class adv:
                 self.info = self.action('take', item)
                 print(self.info)
 
-        if self.info['title'] == "Linh's Shrine" and self.pray:  # there may be other shrines
+        if self.info['title'] == "Linh's Shrine":
+            print('you be praying')  # there may be other shrines
             self.info = self.action('pray')
-
         if self.info['title'] == "shop":
             self.info = self.action('sell', item)
             self.info = self.action('confirm_sell')
@@ -393,7 +393,7 @@ class adv:
             print("*******************************************************")
 
             #!------------------------This name is specific to each person, be sure to change this to yours.
-            if player['name'] == current_name and player['gold'] >= 1000:
+            if player['name'] != my_name and player['gold'] >= 1000:
                 # Go to name changer (pirate ry)
                 print('Time to Buy a Name')
                 # * Made this false here so that we don't somehow pick up a ton of treasure on the way, and
@@ -408,6 +408,14 @@ class adv:
                 self.pray = True
                 print(f"Got a name! Time to get a COIN.")
                 time.sleep(self.wait)
+            elif player['has_mined'] == False and 'mine' in player['abilities'] and 'dash' in player['abilities']:
+                print('ya gon mine')
+                self.auto_coins(acc=True, fly=False)               
+            elif 'pray' in player['abilities'] and 'dash' not in player['abilities']:
+                print('Time to get a new ability')
+                self.pray = True
+                self.accumulate = False
+                self.shrine()            
             elif player['encumbrance'] <= player['strength'] - 2:
                 # If encumbered is str-2 (at base = 8)
                 # Travel the room bfs style at random
@@ -420,15 +428,7 @@ class adv:
                 self.go_to_room(random.randint(0, 499))
                 print('Current Inventory: ', player['inventory'])
                 time.sleep(self.wait)
-            elif 'pray' in player['abilities'] and 'dash' not in player['abilities']:
-                print('Time to get a new ability')
-                self.pray = True
-                self.accumulate = False
-                self.shrine()
-            elif player['has_mined'] == False and 'mine' in player['abilities'] and 'dash' in player['abilities']:
-                print('Ya gon mine')
-                self.accumulate = False
-                self.auto_coins(acc=True, fly=False)
+
             else:
                 # else go directly to the shop
                 # loop through inventory and sell
@@ -447,6 +447,7 @@ class adv:
                     # This doesn't actually update after each sell for some reason.
                     print(f"Your current gold: {player['gold']}")
                 print('Back to Looting')
+        
 
     def get_coins(self):
       # Want this to do 3 things:
@@ -526,7 +527,7 @@ class adv:
         "now added timer stop"
         self.fly = fly
         self.accumulate = acc
-        while True and self.hour<self.auto_stop:
+        while True:
             self.hour = datetime.datetime.today().hour
             self.action('status')
             if 'encumbrance' in self.info.keys() and self.info['encumbrance']>16:
