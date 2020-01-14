@@ -8,6 +8,7 @@ import random
 import os
 from cpu2 import *
 import datetime
+import re
 
 auth_key = '066daecf006de183e6b971b5eadd3c70cb5fee9d' # MAKE SURE YPU HAVE .ENV SET UP
 my_url ='https://lambda-treasure-hunt.herokuapp.com/api/adv/'  # AND PYTHON DECOUPLE INSTALLED
@@ -97,7 +98,7 @@ class adv:
         """another multi purpose request function
         this one focuses on less common actions"""
 
-        if what in ['take', 'drop', 'sell', 'examine']:
+        if what in ['take', 'drop', 'sell', 'examine', 'wear', 'transmogrify']:
             response = requests.post(
                 f'{my_url}{what}/', headers=self.header, json={"name": treasure})
             print(f"Action: {what}")
@@ -117,7 +118,7 @@ class adv:
         if what == 'balance':
             response = requests.get(
                 'https://lambda-treasure-hunt.herokuapp.com/api/bc/get_balance/', headers=self.header)
-
+        if what == tr
         if response.status_code == 200:
             self.info = json.loads(response.content)
             if 'cooldown' in self.info.keys():
@@ -371,10 +372,6 @@ class adv:
         self.go_to_room(461)
         time.sleep(self.wait)
 
-    def transmogrify(self):
-        self.go_to_room(495)
-        time.sleep(self.wait)
-
     # Method to get treasure
     # BFS Randomly to travel the maze, looting
     # Once you get enough treasure, go sell
@@ -412,7 +409,7 @@ class adv:
                 self.pray = True
                 print(f"Got a name! Time to get a COIN.")
                 time.sleep(self.wait)
-            elif player['has_mined'] == False and 'mine' in player['abilities'] and 'dash' in player['abilities']:
+            elif player['has_mined'] == True and 'mine' in player['abilities'] and 'dash' in player['abilities']:
                 print('ya gon mine')
                 self.auto_coins(acc=True, fly=False)               
             elif 'pray' in player['abilities'] and 'dash' not in player['abilities']:
@@ -524,13 +521,28 @@ class adv:
         self.action('status')
         inv = self.info['inventory']
         for i in inv:
-            self.action('sell',i)
-            self.action('confirm_sell',i)
+            self.action('sell', i)
+            self.action('confirm_sell', i)
+    
+    def equip_items(self):
+        self.action('status')
+        inv = self.info['inventory']
+        for i in inv:
+            if 'treasure' not in i:
+                self.action('wear', i)
+
+    def transmogrify(self):
+        self.action('status')
+        inv = self.info['inventory']
+        for i in inv:
+            self.action('transmogrify', i)
+        
 
     def auto_coins(self,acc=True,fly=True):
         "now added timer stop"
         self.fly = fly
         self.accumulate = acc
+        self.balance = 0
         while True:
             self.hour = datetime.datetime.today().hour
             self.action('status')
@@ -539,7 +551,13 @@ class adv:
                 self.sell_all_items()
                 self.action('status')
                 print(self.info)
-            
+            if self.balance > 5 and len(self.info['inventory']) >= 3:
+                print('you have {self.balance} coins...')
+                print('we go transmogrify yo coins')
+                self.dash_to_room(495)
+                self.transmogrify()
+                self.equip_items()
+
             self.dash_to_room(55)
             self.hint_to_ld8()
             cpu = CPU()
@@ -558,7 +576,10 @@ class adv:
             self.dash_to_room(mine_room)
             self.get_proof()
             self.action('balance')  #new lines
-            print(self.info)        #new lines
+            print(self.info)        #new 
+            msg = re.findall(r'\d+', self.info['messages'][0])
+                if msg:
+                    self.balance = list(map(int, msg))[0]
 
     
 
