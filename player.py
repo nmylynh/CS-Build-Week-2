@@ -371,6 +371,10 @@ class adv:
         self.go_to_room(461)
         time.sleep(self.wait)
 
+    def transmogrify(self):
+        self.go_to_room(495)
+        time.sleep(self.wait)
+
     # Method to get treasure
     # BFS Randomly to travel the maze, looting
     # Once you get enough treasure, go sell
