@@ -406,7 +406,6 @@ class adv:
                 self.pirate()  # pirate ry's room
                 time.sleep(self.wait)
                 # Buy name
-                #! -------------------------- Change the name here to be what you want!!
                 self.action('change_name', name=my_name)
                 time.sleep(self.wait)
                 self.pray = True
