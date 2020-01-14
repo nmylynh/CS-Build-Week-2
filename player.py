@@ -1,4 +1,3 @@
-
 from utils import *
 from miner import *
 import requests
@@ -9,10 +8,11 @@ import os
 from cpu2 import *
 import datetime
 import re
+from decouple import config
 
-auth_key = '066daecf006de183e6b971b5eadd3c70cb5fee9d' # MAKE SURE YPU HAVE .ENV SET UP
-my_url ='https://lambda-treasure-hunt.herokuapp.com/api/adv/'  # AND PYTHON DECOUPLE INSTALLED
-my_name = 'Mitsy'  # when to change name
+auth_key = config('KEY')
+my_url = config('URL')
+my_name = config('NAME')
 
 
 def keystoint(x):
