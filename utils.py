@@ -1,124 +1,131 @@
 class Queue():
     def __init__(self):
         self.queue = []
+
+    def __repr__(self):
+        return f'{self.queue}'
+
     def enqueue(self, value):
         self.queue.append(value)
+
     def dequeue(self):
         if self.size() > 0:
             return self.queue.pop(0)
         else:
             return None
+
     def size(self):
         return len(self.queue)
+
 
 class Stack():
     def __init__(self):
         self.stack = []
+
     def push(self, value):
         self.stack.append(value)
+
     def pop(self):
         if self.size() > 0:
             return self.stack.pop()
         else:
             return None
+
     def size(self):
         return len(self.stack)
 
+
 class Graph:
     """Represent a graph as a dictionary of vertices mapping labels to edges."""
+
     def __init__(self):
         self.vertices = {}
+
     def add_vertex(self, vertex):
         """
         Add a vertex to the graph.
         """
-        self.vertices[vertex] = set() # returns a sorted, non repeating collection like a list or dictionary, if no given iterable parameter is provided, it makes an empty set
+        if vertex not in self.vertices.keys():
+            self.vertices[vertex] = set()
+        else:
+            pass
+
     def add_edge(self, v1, v2):
         """
         Add a directed edge to the graph.
         """
-        if v1 in self.vertices and v2 in self.vertices:
+        if v1 and v2 in self.vertices.keys():
+         # self.vertices[v2].add(v1)
             self.vertices[v1].add(v2)
-        else:
-            raise IndexError("That vertex does not exist.")
-        
+
     def bft(self, starting_vertex):
         """
         Print each vertex in breadth-first order
         beginning from starting_vertex.
-        """     
-        # Create an empty queue and enqueue the starting vertex ID
-        q = Queue()
-        # Create and empty Set to store the visited vertices
-        visited = set()
-        q.enqueue(starting_vertex)
-        # While the queue is not empty...
-        while q.size() > 0:    
-            # Dequeue the first vertex
-            v = q.dequeue()
-            # If that vertex has not been visited...
-            if v not in visited:    
-                # Mark is as visited
-                print(v)
-                visited.add(v)
-                # Then add all of its neighbors to the back of the queue
-                for neighbor in self.vertices[v]:
-                    q.enqueue(neighbor)
-        return visited
+        """
+        ret_list = []
+        if starting_vertex is None:
+            return None
+        my_q = Queue()
+        visited = [starting_vertex]
+        my_q.enqueue(starting_vertex)
+        while len(my_q.queue) > 0:
+            point = my_q.queue[0]
+            joins = self.vertices[point]
+            for j in joins:
+                if j not in visited:
+                    my_q.enqueue(j)
+                    visited.append(j)
+            # print(my_q.dequeue())
+            ret = my_q.dequeue()
+            ret_list.append(ret)
+        return ret_list
 
-    def dft(self, starting_vertex):
+    def dft(self, starting_vertex, chooser=None):
         """
         Print each vertex in depth-first order
         beginning from starting_vertex.
         """
-        # Create an empty stack and push the starting vertex ID
-        s = Stack()
-        s.push(starting_vertex)
-        # Create a Set to store visited vertices
-        visited = set()
-        order = []
-        # While the stack is not empty...
-        while s.size() > 0:
-            # Pop the first vertex
-            v = s.pop()
-            # If that vertex has not been visited...
-            if v not in visited:
-                # Mark it as visited...
-                print(v)
-                visited.add(v)
-                order.append(v)
-                # Then add all of its neighbors to top of the stack
-                for neighbor in self.vertices[v]:
-                    s.push(neighbor)
-        return order
+        ret_list = []
+        if starting_vertex is None:
+            return None
+        my_s = Stack()
+        visited = [starting_vertex]
+        my_s.push(starting_vertex)
+        while len(my_s.stack) > 0:
+            point = my_s.stack[-1]
+            joins = self.vertices[point]
+            r = my_s.pop()  # new code
+            ret_list.append(r)  # new code
+            # print(r)  ##changed to r from pop
+            if chooser is None:
+                pass
+            elif chooser == 'random':
+                joins = random.sample(joins, len(joins))
+            elif chooser == 'shortest':
+                joins = find_longest_clique(point, self, visited)
+            for j in joins:
+                if j not in visited:
+                    my_s.push(j)
+                    visited.append(j)
+        return ret_list
 
-    def dft_recursive(self, starting_vertex, visited=None):
+    def dft_recursive(self, starting_vertex, visited=[]):
         """
         Print each vertex in depth-first order
         beginning from starting_vertex.
         This should be done using recursion.
         """
-        if visited is None:
-            visited = set()
         print(starting_vertex)
-        visited.add(starting_vertex)
-        for child_vertex in self.vertices[starting_vertex]:
-            if child_vertex not in visited:
-                self.dft_recursive(child_vertex, visited)
-
-    
-    # def dft_recursive(self, starting_vertex, visited=set()):
-    #     """
-    #     Print each vertex in depth-first order
-    #     beginning from starting_vertex.
-    #     This should be done using recursion.
-    #     """
-    #     if starting_vertex not in visited:
-    #         visited.add(starting_vertex)
-    #         print(starting_vertex)
-    #         for neighbor in self.vertices[starting_vertex]:
-    #             self.dft_recursive(neighbor, visited)
-                
+        visited.append(starting_vertex)
+        joins = self.vertices[starting_vertex]
+        if joins is None:
+            return None
+        for j in joins:
+            if j in visited:
+                pass
+            else:
+                self.dft_recursive(j, visited)
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -126,20 +133,30 @@ class Graph:
         starting_vertex to destination_vertex in
         breath-first order.
         """
-        qq = Queue()
+        print('Starting BFS')
+        q = Queue()
         visited = set()
-        qq.enqueue([starting_vertex])
-        while qq.size() > 0:
-            path = qq.dequeue()
-            vertex = path[-1]
-            if vertex not in visited:
-                if vertex == destination_vertex:
-                    return path
-                visited.add(vertex)
-                for next_vert in self.vertices[vertex]:
-                    new_path = list(path) # create deep copy instead of ref
-                    new_path.append(next_vert)
-                    qq.enqueue(new_path)
+        q.enqueue([starting_vertex])
+        print(f'Starting vertex: {starting_vertex}')
+        print(f'End Room: {destination_vertex}')
+
+        while destination_vertex not in q.queue[0]:
+            # while q.queue[0][-1] != destination_vertex:
+            # print(q)
+            current_point = q.queue[0][-1]
+            # print(f'current point: {current_point}')
+            joins = self.vertices[current_point].values()
+            # print(joins)
+            for j in joins:
+                # print(f'J: {j}')
+                if j != '?' and j not in visited:
+                    visited.add(j)
+                    _ = [x for x in q.queue[0]]
+                    _.append(j)
+                    q.enqueue(_)
+            q.dequeue()
+
+        return q.queue[0]
 
     def dfs(self, starting_vertex, destination_vertex):
         """
@@ -147,18 +164,23 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        stack = Stack()
-        visited = set()
-        stack.push([starting_vertex])
-        while stack.size() > 0:
-            path = stack.pop()
-            vertex = path[-1]
-            if vertex not in visited:
-                if vertex == destination_vertex:
-                    return path
-                visited.add(vertex)
-                for next_vert in self.vertices[vertex]:
-                    new_path = list(path)
-                    new_path.append(next_vert)
-                    stack.push(new_path)
+        s = Stack()
+        s.push([starting_vertex])
 
+        while destination_vertex not in s.stack[-1]:
+            current_point = s.stack[-1][-1]
+
+            joins = self.vertices[current_point]
+            if joins is None:
+                s.pop()
+            else:
+                temp_list = []
+                for j in joins:
+                    _ = [x for x in s.stack[-1]]
+                    _.append(j)
+                    temp_list.append(_)
+                for tl in temp_list:
+                    s.push(tl)
+            # s.pop()
+
+        return s.stack[-1]
