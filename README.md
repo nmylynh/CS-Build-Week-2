@@ -1,3 +1,15 @@
+# INSTRUCTIONS: 
+
+1. pipenv install
+2. create a .env file:
+```
+KEY=[your key/token]
+URL=https://lambda-treasure-hunt.herokuapp.com/api/adv/
+NAME=[whatever name you want when you change it]
+```
+3. run `python adventureTime.py` in the terminal
+4. leave it and forget it
+
 # CS Build Week 2
 
 For your second CS Build Week, you and a small team will be competing against your fellow CS students in the ***Lambda Treasure Hunt***. To succeed, you will need to apply knowledge you've learned throughout your entire tenure at Lambda School -- CS, Labs and main track -- to efficiently traverse an island maze, collect treasure, solve puzzles, unearth powerful artifacts and more. Glory and riches await the victors!
